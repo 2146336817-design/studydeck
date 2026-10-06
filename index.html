@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>课业 · 本地网课学习管理器</title>
+<meta name="description" content="课业 StudyDeck —— 本地优先的网课学习管理器。B 站高清直连、AI 笔记与错题解析、学习计时与进度追踪，数据全在你手里。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f6b54'/><path d='M28 30h30a12 12 0 0112 12v28a0 0 0 010 0H28a0 0 0 010 0V30z' fill='none' stroke='white' stroke-width='7' stroke-linejoin='round'/><line x1='38' y1='44' x2='58' y2='44' stroke='white' stroke-width='6' stroke-linecap='round'/><line x1='38' y1='56' x2='52' y2='56' stroke='white' stroke-width='6' stroke-linecap='round'/></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fbfbfd;--bg-dark:#000;--text:#1d1d1f;--text-secondary:#6e6e73;
+  --text-light:#f5f5f7;--text-light-secondary:#a1a1a6;--accent:#0f6b54;
+  --accent-hover:#0c5a46;--card-bg:#fff;--border:rgba(0,0,0,.08);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue","PingFang SC","Microsoft YaHei",sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* ===== 导航 ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(251,251,253,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:17px;letter-spacing:-.02em}
+.nav-logo svg{flex-shrink:0}
+.nav-links{display:flex;gap:28px;font-size:14px;color:var(--text-secondary)}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--accent);color:#fff;padding:7px 16px;border-radius:980px;font-size:13px;font-weight:500;transition:background .2s}
+.nav-cta:hover{background:var(--accent-hover)}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ===== Hero ===== */
+.hero{padding:140px 0 100px;text-align:center}
+.hero-eyebrow{font-size:17px;font-weight:500;color:var(--accent);letter-spacing:.02em;margin-bottom:12px}
+.hero h1{font-size:clamp(40px,7vw,68px);font-weight:700;letter-spacing:-.03em;line-height:1.08;margin-bottom:20px}
+.hero h1 .gradient{background:linear-gradient(135deg,var(--accent) 0%,#2e9b7a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(18px,2.5vw,24px);color:var(--text-secondary);max-width:640px;margin:0 auto 40px;line-height:1.4;letter-spacing:-.01em}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;padding:14px 28px;border-radius:980px;font-size:16px;font-weight:500;transition:all .2s;box-shadow:0 4px 20px rgba(15,107,84,.25)}
+.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 6px 28px rgba(15,107,84,.35)}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;color:var(--accent);font-size:16px;font-weight:500;padding:14px 8px;transition:opacity .2s}
+.btn-secondary:hover{opacity:.7}
+.btn-secondary svg{transition:transform .2s}
+.btn-secondary:hover svg{transform:translateX(3px)}
+.hero-note{margin-top:20px;font-size:13px;color:var(--text-secondary)}
+
+/* ===== 通用区块 ===== */
+section{padding:100px 0}
+.section-dark{background:var(--bg-dark);color:var(--text-light)}
+.section-gray{background:#f5f5f7}
+.section-white{background:#fff}
+.section-label{font-size:14px;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.section-dark .section-label{color:#34c79a}
+.section-title{font-size:clamp(32px,4.5vw,48px);font-weight:700;letter-spacing:-.025em;line-height:1.15;margin-bottom:16px}
+.section-sub{font-size:clamp(17px,2vw,21px);color:var(--text-secondary);max-width:600px;line-height:1.4}
+.section-dark .section-sub{color:var(--text-light-secondary)}
+
+/* ===== 亮点卡片 ===== */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.feature-card{background:var(--card-bg);border-radius:24px;padding:36px 28px;border:1px solid var(--border);transition:transform .3s,box-shadow .3s}
+.feature-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.08)}
+.feature-icon{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,rgba(15,107,84,.1),rgba(46,155,122,.08));display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.feature-card h3{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:10px}
+.feature-card p{font-size:15px;color:var(--text-secondary);line-height:1.6}
+@media(max-width:900px){.features-grid{grid-template-columns:1fr;max-width:480px;margin:56px auto 0}}
+
+/* ===== 功能全景 bento ===== */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.bento .feature-card{padding:30px 26px;height:100%}
+.bento .feature-card.wide{grid-column:span 2}
+.bento .feature-card h3{font-size:19px}
+.bento .feature-card .feat-list{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.bento .feature-card .feat-list li{position:relative;padding-left:18px;font-size:14px;color:var(--text-secondary);line-height:1.55}
+.bento .feature-card .feat-list li::before{content:"";position:absolute;left:2px;top:8px;width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.55}
+.bento .feature-card .feat-list li b{color:var(--text);font-weight:600}
+@media(max-width:900px){.bento{grid-template-columns:1fr;max-width:480px;margin:56px auto 0}.bento .feature-card.wide{grid-column:span 1}}
+
+/* ===== 备份同步三栏 ===== */
+.backup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.backup-card{border:1px solid var(--border);border-radius:24px;padding:34px 28px;background:var(--card-bg)}
+.backup-card .feature-icon{margin-bottom:18px}
+.backup-card h3{font-size:19px;font-weight:600;margin-bottom:10px;letter-spacing:-.01em}
+.backup-card p{font-size:14.5px;color:var(--text-secondary);line-height:1.6}
+@media(max-width:900px){.backup-grid{grid-template-columns:1fr;max-width:480px;margin:56px auto 0}}
+
+/* ===== AI 区（深色） ===== */
+.ai-section{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.ai-visual{background:linear-gradient(145deg,#111,#1a1a1a);border-radius:28px;padding:40px;border:1px solid rgba(255,255,255,.08);position:relative;overflow:hidden}
+.ai-visual::before{content:"";position:absolute;top:-50%;right:-30%;width:300px;height:300px;background:radial-gradient(circle,rgba(15,107,84,.3),transparent 70%);pointer-events:none}
+.ai-chat{position:relative;z-index:1}
+.ai-msg{background:rgba(255,255,255,.06);border-radius:16px;padding:16px 18px;margin-bottom:12px;font-size:14px;line-height:1.6;color:var(--text-light)}
+.ai-msg.user{background:rgba(15,107,84,.3);margin-left:40px}
+.ai-msg .label{font-size:11px;color:var(--text-light-secondary);margin-bottom:6px;font-weight:500}
+.ai-msg strong{color:#34c79a}
+@media(max-width:900px){.ai-section{grid-template-columns:1fr;gap:40px}}
+
+/* ===== 下载 CTA ===== */
+.download-cta{text-align:center;padding:120px 0}
+.download-cta h2{font-size:clamp(36px,5vw,56px);font-weight:700;letter-spacing:-.03em;margin-bottom:16px}
+.download-cta p{font-size:19px;color:var(--text-secondary);margin-bottom:36px;max-width:500px;margin-left:auto;margin-right:auto}
+.download-meta{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:28px;font-size:13px;color:var(--text-secondary)}
+.download-meta span{display:flex;align-items:center;gap:6px}
+
+/* ===== Footer ===== */
+footer{border-top:1px solid var(--border);padding:40px 0;text-align:center;font-size:13px;color:var(--text-secondary)}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ===== 导航 ===== -->
+<nav>
+  <div class="nav-inner">
+    <a href="#top" class="nav-logo">
+      <svg width="26" height="26" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#0f6b54"/><path d="M28 30h30a12 12 0 0112 12v28H28V30z" fill="none" stroke="white" stroke-width="7" stroke-linejoin="round"/><line x1="38" y1="44" x2="58" y2="44" stroke="white" stroke-width="6" stroke-linecap="round"/><line x1="38" y1="56" x2="52" y2="56" stroke="white" stroke-width="6" stroke-linecap="round"/></svg>
+      课业
+    </a>
+    <div class="nav-links">
+      <a href="#features">功能</a>
+      <a href="#ai">AI 笔记</a>
+      <a href="#backup">备份</a>
+      <a href="#privacy">隐私</a>
+      <a href="#download">下载</a>
+    </div>
+    <a href="#download" class="nav-cta">免费下载</a>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section class="hero" id="top">
+  <div class="container">
+    <div class="hero-eyebrow">课业 · StudyDeck</div>
+    <h1>网课学习，<br><span class="gradient">本该更专注。</span></h1>
+    <p class="hero-sub">本地优先的网课学习管理器。B 站高清直连、AI 自动笔记、错题深度解析，学习计时与进度追踪——所有数据全在你自己的电脑上。</p>
+    <div class="hero-actions">
+      <a href="assets/StudyDeck-0.1.0-Windows.zip" class="btn-primary" download>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Windows 版下载
+      </a>
+      <a href="#features" class="btn-secondary">
+        了解功能
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <p class="hero-note">Windows 10 / 11 · 便携版免安装 · 仅 170 KB · 开源可审计</p>
+  </div>
+</section>
+
+<!-- ===== 功能全景 ===== -->
+<section id="features">
+  <div class="container">
+    <div style="text-align:center">
+      <div class="section-label">功能全景</div>
+      <h2 class="section-title">覆盖「导入 → 播放 → 记录 → 复习 → 复盘」<br>完整学习闭环。</h2>
+      <p class="section-sub" style="margin:0 auto">不是通用课程表的搬运，而是为网课学习的每一个真实痛点而设计。</p>
+    </div>
+    <div class="bento">
+
+      <div class="feature-card wide">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3>B 站一键批量导入</h3>
+        <p>粘贴链接即可批量入库，无需一集一集手动添加。</p>
+        <ul class="feat-list">
+          <li>兼容<b>合集 / 收藏夹 / 番剧 / 综艺 / 电视剧 / UP 主页 / 单集</b>等多种链接</li>
+          <li>自动拉取分 P 标题与顺序，整门课一次导入</li>
+          <li>也支持任意外部网页视频链接</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        </div>
+        <h3>本地视频入库</h3>
+        <p>多选本地视频文件批量加入课程，自动记住文件位置。</p>
+        <ul class="feat-list">
+          <li>支持 Edge / Chrome 记住路径</li>
+          <li>MKV 等格式可转系统播放器</li>
+        </ul>
+      </div>
+
+      <div class="feature-card wide">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/><polygon points="10 9 15 11 10 13 10 9" fill="#0f6b54" stroke="none"/></svg>
+        </div>
+        <h3>内置高清直连播放器</h3>
+        <p>本地服务代理取官方直链，手写 DASH-MSE 播放器，无需跳转 B 站页面。</p>
+        <ul class="feat-list">
+          <li><b>1080P / 1080P+ / 4K</b>，大会员画质，番剧与普通视频均可直连</li>
+          <li>全屏、倍速、上一集 / 下一集、字幕、亮 / 暗主题</li>
+          <li>浮动小窗（拖移缩放）、直链自动续期、CDN 主备轮换、拖动进度即时重定位</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h12"/><path d="M17 17l4 4M21 17l-4 4"/></svg>
+        </div>
+        <h3>课程与分集管理</h3>
+        <p>课程 / 分集增删改，自定义名称、学科、标识色、简介。</p>
+        <ul class="feat-list">
+          <li>课程与分集均支持<b>拖拽排序</b></li>
+          <li>字母头像、时长、最近学习自动汇总</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <h3>学习计时不丢失</h3>
+        <p>播放即自动计时、暂停自动结算，也可手动补记。</p>
+        <ul class="feat-list">
+          <li>每 30 秒存档，监听刷新 / 崩溃 / 断电</li>
+          <li>看一小时中途退出，时长也能保住</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+        </div>
+        <h3>统计与学习历史</h3>
+        <p>按日聚合、课程时长汇总、完成度追踪。</p>
+        <ul class="feat-list">
+          <li>每集进度、累计学习时长一目了然</li>
+          <li>学习历史记录，回看每天投入</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        </div>
+        <h3>Markdown 笔记</h3>
+        <p>边看边记，支持 Markdown 语法，关联视频时间点。</p>
+        <ul class="feat-list">
+          <li>笔记列表检索、随手快速记录</li>
+          <li>点击时间点即可回跳视频对应位置</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.8 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg>
+        </div>
+        <h3>错题本</h3>
+        <p>记录题干、答案与复盘，集中管理薄弱知识点。</p>
+        <ul class="feat-list">
+          <li>学科 / 章节 / 知识点标签</li>
+          <li>支持附件关联，配合 AI 深度解析</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>任务 · 课程表 · 打卡</h3>
+        <p>每日任务、固定课程表自动排期，每日学习目标与打卡。</p>
+        <ul class="feat-list">
+          <li>弹性课程、重复任务自动生成</li>
+          <li>任务执行记录，完成情况可追溯</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/><path d="M12 2v2M22 12h-2"/></svg>
+        </div>
+        <h3>考试倒计时</h3>
+        <p>概览页倒计时卡片，高考 / 考研 / 任意考试日期。</p>
+        <ul class="feat-list">
+          <li>日期自定义、可随时关闭</li>
+          <li>保持备考节奏与紧迫感</li>
+        </ul>
+      </div>
+
+      <div class="feature-card wide">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3>资料与附件库</h3>
+        <p>课件、图片、文档以原始二进制保存，可关联到笔记与错题，不再用 Base64 撑大备份。</p>
+        <ul class="feat-list">
+          <li>附件走独立二进制通道（multipart 上传 → blobs/），写入更快</li>
+          <li>资料库统一检索管理，换机时随备份一并带走</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3>全局搜索</h3>
+        <p>顶部一键搜索课程、视频、资料、错题、笔记，秒级定位。</p>
+        <ul class="feat-list">
+          <li>多标签页数据自动同步不互踩</li>
+        </ul>
+      </div>
+
+      <div class="feature-card wide">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        </div>
+        <h3>本地媒体库 · MKV/AVI 转码播放</h3>
+        <p>指定一个视频文件夹，应用直接读取。浏览器不支持的格式（MKV / AVI / FLV / WMV 等）自动用 ffmpeg 实时转码为可播放格式，无需手动转换。</p>
+        <ul class="feat-list">
+          <li>MP4 / WebM 原生直读，支持进度条拖动（Range）</li>
+          <li>MKV / AVI 等格式实时转码 fMP4 流，边转边播</li>
+          <li>视频文件不会被复制或上传，完全本地处理</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </div>
+        <h3>明暗主题</h3>
+        <p>亮色 / 暗色 / 跟随系统，三种模式自由切换，长时间学习不刺眼。</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== AI 笔记（深色） ===== -->
+<section id="ai" class="section-dark">
+  <div class="container">
+    <div class="ai-section">
+      <div>
+        <div class="section-label">AI 助力</div>
+        <h2 class="section-title">AI 自动笔记，<br>错题深度解析。</h2>
+        <p class="section-sub">看完一集，AI 自动生成结构化笔记——核心概念、公式推导、重点例题。错题一键拍照或粘贴，AI 给出解题思路与同类题推荐。</p>
+        <div style="margin-top:32px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34c79a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style="font-size:15px;color:var(--text-light)">接入 DeepSeek / OpenAI 兼容接口，Key 只存在本地</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34c79a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style="font-size:15px;color:var(--text-light)">笔记自动关联视频时间点，点击即可回跳</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34c79a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style="font-size:15px;color:var(--text-light)">错题解析含解题思路、易错点、知识点标签</span>
+          </div>
+        </div>
+      </div>
+      <div class="ai-visual">
+        <div class="ai-chat">
+          <div class="ai-msg">
+            <div class="label">AI 笔记 · 第3讲 牛顿第二定律</div>
+            <strong>核心概念</strong><br>
+            物体加速度与所受合外力成正比，与质量成反比，方向与合外力相同。<br><br>
+            <strong>公式</strong><br>
+            F = ma（F 为合外力，单位 N；m 为质量，单位 kg；a 为加速度，单位 m/s²）<br><br>
+            <strong>易错点</strong><br>
+            · F 是<strong>合外力</strong>，不是某个力<br>
+            · 瞬时对应性：力变则加速度立即变<br>
+            · 矢量性：加速度方向始终与合外力一致
+          </div>
+          <div class="ai-msg user">
+            <div class="label">你的提问</div>
+            这道题为什么用整体法而不是隔离法？
+          </div>
+          <div class="ai-msg">
+            <div class="label">AI 解析</div>
+            当两个物体<strong>加速度相同</strong>时，整体法可避开内力（如绳的拉力），直接求系统加速度。若需内力大小，再隔离单个物体。本题中 A、B 一起加速，先整体求 a = F/(m_A+m_B)，再隔离求绳拉力 T = m_B·a。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 备份与同步（浅灰） ===== -->
+<section id="backup" class="section-gray">
+  <div class="container">
+    <div style="text-align:center">
+      <div class="section-label">备份与多机迁移</div>
+      <h2 class="section-title">数据带得走，<br>也丢不了。</h2>
+      <p class="section-sub" style="margin:0 auto 8px">多重备份机制，换机、重装、误删都有退路。</p>
+    </div>
+    <div class="backup-grid">
+      <div class="backup-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3>导入 / 导出</h3>
+        <p>元数据 JSON 一键导出导入，支持合并与覆盖两种模式；覆盖导入前自动生成回滚备份，出错可一键找回。旧格式备份自动迁移。</p>
+      </div>
+      <div class="backup-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+        </div>
+        <h3>本机 + 网盘双备份</h3>
+        <p>本机目录自动备份（元数据 + 原始附件）；绑定 OneDrive / 百度网盘 / 飞书等同步文件夹，约 2 分钟自动写入，保留近 14 天快照。</p>
+      </div>
+      <div class="backup-card">
+        <div class="feature-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <h3>不静默丢数据</h3>
+        <p>备份前显示附件总大小，超过 15MB 的大附件明确列出跳过清单；恢复后做一致性审计，缺失文件显式标注，绝不让你误以为备份完整。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 隐私 / 本地优先 ===== -->
+<section id="privacy" class="section-white">
+  <div class="container">
+    <div style="text-align:center;max-width:680px;margin:0 auto">
+      <div class="section-label">隐私优先</div>
+      <h2 class="section-title">你的学习数据，<br>只属于你。</h2>
+      <p class="section-sub" style="margin:0 auto 48px">课业是纯本地应用。课程、笔记、错题、学习记录全部存储在你电脑的 IndexedDB 中，不上传任何服务器。可选网盘同步，数据加密后由你自己的网盘账号保管。</p>
+    </div>
+    <div class="features-grid" style="margin-top:0">
+      <div class="feature-card" style="text-align:center">
+        <div class="feature-icon" style="margin:0 auto 20px">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </div>
+        <h3>零云依赖</h3>
+        <p>无需注册账号，无需联网即可使用全部核心功能。视频流直连 B 站官方 CDN，不经过任何第三方中转。</p>
+      </div>
+      <div class="feature-card" style="text-align:center">
+        <div class="feature-icon" style="margin:0 auto 20px">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <h3>凭证本地存储</h3>
+        <p>B 站 SESSDATA 与 AI API Key 仅存在本地文件与浏览器存储中，随请求直发官方接口，不进入备份，不经过任何中间服务器。</p>
+      </div>
+      <div class="feature-card" style="text-align:center">
+        <div class="feature-icon" style="margin:0 auto 20px">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0f6b54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+        </div>
+        <h3>开源可审计</h3>
+        <p>全部代码可读可审，无遥测、无埋点、无广告。便携版仅 170 KB，解压即用，不写注册表，不安装系统服务。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 下载 CTA ===== -->
+<section id="download" class="download-cta">
+  <div class="container">
+    <h2>开始更专注的学习。</h2>
+    <p>下载便携版，解压后双击「启动课业（B站高清）.bat」，浏览器自动打开即可使用。</p>
+    <a href="assets/StudyDeck-0.1.0-Windows.zip" class="btn-primary" download style="font-size:18px;padding:16px 36px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载 Windows 便携版
+    </a>
+    <div class="download-meta">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Windows 10 / 11
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        170 KB 便携版
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        免安装 · 不写注册表
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer>
+  <div class="container">
+    <p>课业 · StudyDeck —— 本地网课学习管理器</p>
+    <p style="margin-top:8px">B 站高清直连 · AI 笔记与错题解析 · 学习计时与进度追踪 · 数据全在本地</p>
+    <p style="margin-top:8px">本项目与 B 站无官方关联，视频内容版权归原作者所有。</p>
+  </div>
+</footer>
+
+</body>
+</html>
